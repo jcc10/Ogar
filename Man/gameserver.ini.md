@@ -6,13 +6,13 @@
 Sections are separated by '// [Section]'.
 
 Each setting is on a new line, all settings are currently numbers, example settings below.
-'''ini
+```ini
 // [Server]
 ...
 serverStatsPort = 88
 serverStatsUpdate = 60
 serverLogLevel = 1
-'''
+```
 
 As the INI is updated may be updated on rather simple text editors remotely I elected to write all documentation sepreatly.
 Most of this comes from './src/GameServer.js' but no one decided to add into the INI.
@@ -21,14 +21,14 @@ This file should have the default values for each setting.
 
 ### Head
 This currently contains non-essential content.
-'''ini
+```ini
 // Ogar configurations file
 // Lines starting with slashes are comment lines
-'''
+```
 
 ### Server
 This is for basic server information.
-'''ini
+```ini
 // [Server]
 
 // How many connections will the server accept
@@ -58,7 +58,7 @@ serverStatsUpdate = 60
 
 // Logging level of the server. 0 = No logs, 1 = Logs the console, 2 = Logs console and ip connections
 serverLogLevel = 1
-'''
+```
 
 ### Border
 
@@ -71,21 +71,21 @@ right  | 11180.3398875
 bottom | 11180.3398875
 left   | 0
 
-'''ini
+```ini
 // [Border]
 
 borderLeft = 0
 borderRight = 6000
 borderTop = 0
 borderBottom = 6000
-'''
+```
 
 ### Food Spawn
 **REMEMBER: Time is measured in ticks! (~50 ms)**
 
 Food is the little cells that you eat (Not the player cells though!)
 
-'''ini
+```ini
 // [Spawn]
 
 // The interval between each food cell spawn in ticks
@@ -115,10 +115,10 @@ virusStartMass = 100
 
 // Amount of times you need to feed a virus to shoot it
 virusFeedAmount = 7
-'''
+```
 
 ### Raw Stuff:
-'''ini
+```ini
 
 // [Ejected Mass]
 // ejectMass: Mass of ejected cells
@@ -158,4 +158,4 @@ tourneyEndTime = 30
 tourneyTimeLimit = 20
 tourneyAutoFill = 0
 tourneyAutoFillPlayers = 1
-'''
+```
