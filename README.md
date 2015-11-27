@@ -4,8 +4,22 @@ A fully functional open source Agar.io server implementation, written in Node.js
 ### Official Website
 The official website for the Ogar Project is [ogarproject.com](http://ogarproject.com). You can register on our forums to chat with other Ogar users, get support, advertise your server, and more.
 
-### Purchased Ogar?
-If you've purchased a copy of Ogar, you've probably been ripped off. [This post on our website explains why.](http://ogarproject.com/threads/psa-if-you-purchased-ogar-youve-been-ripped-off.6/)
+### Leagal:
+The Apache 2 license OGAR is released under means:
+You must:
+- Keep this License and copyright notice
+- State Changes
+
+You can:
+- Run it Commercialy
+- Distribute it
+- Modify it
+- Run it Privately
+- Sublicence it
+
+You can not:
+- Hold Us Liable
+- Use Trademark
 
 ## Obtaining and Using
 If you are on Windows, you can download the latest binary build of Ogar [from this page](http://dl.ogarproject.com/). The binary is the easiest way to get started running an Ogar server. If you'd like to tinker with the source code, you can follow the instructions below (and slightly modify them) to run the source on Windows.
@@ -26,7 +40,7 @@ Using the install script:
 Using ```sudo -u ogar -H /bin/sh -c "cd; /bin/node src/index.js" ``` to launch the server increases security by running the process as an unprivileged, dedicated user with a limited shell and it is recommended to do so.
 
 Currently, Ogar listens on the following addresses and ports:
-* *:80 - for the master server
+* *:80 - for the stats server
 * *:443 - for the game server
 
 Please note that on some systems, you may have to run the process as root or otherwise elevate your privileges to allow the process to listen on the needed ports. **If you are getting an EADDRINUSE error, it means that the port required to run Ogar is being used. Usually, Skype is the culprit. To solve this, either close out skype, or change the serverPort value in gameserver.ini to a different port. You will have to change your connection ip to "127.0.0.1:PORT"**
