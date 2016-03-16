@@ -117,19 +117,28 @@ virusStartMass = 100
 virusFeedAmount = 7
 ```
 
-### Raw Stuff:
+### Ejected Mass
+Note: By default when you eject mass a "food" entity shoots out @ 12 mass but you will loose 16 mass. (Net loss of 12 mass)
+
 ```ini
-
 // [Ejected Mass]
-// ejectMass: Mass of ejected cells
-// ejectMassLoss: Mass lost when ejecting cells
-// ejectSpeed: Base speed of ejected cells
-// ejectSpawnPlayer: Chance for a player to spawn from ejected mass
-ejectMass = 12
-ejectMassLoss = 16
-ejectSpeed = 160
-ejectSpawnPlayer = 50
 
+// Mass ejected from the cell
+ejectMass = 12
+
+// Mass removed from the cell
+ejectMassLoss = 16
+
+// Base speed of ejected cells
+ejectSpeed = 160
+
+// Chance for a player to spawn from ejected mass
+ejectSpawnPlayer = 50
+```
+
+### Player
+
+```ini
 // [Player]
 // playerRecombineTime: Base amount of ticks before a cell is allowed to recombine (1 tick = 1000 milliseconds)
 // playerMassDecayRate: Amount of mass lost per tick (Multiplier) (1 tick = 1000 milliseconds)
@@ -146,7 +155,11 @@ playerMinMassDecay = 9
 playerMaxNickLength = 15
 playerSpeed = 30
 playerDisconnectTime = 60
+```
 
+### Gamemode:
+
+```ini
 // [Gamemode]
 // Custom gamemode settings
 // tourneyTimeLimit: Time limit of the game, in minutes.
