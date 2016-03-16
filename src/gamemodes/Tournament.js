@@ -43,6 +43,7 @@ Tournament.prototype.startGame = function(gameServer) {
 
 Tournament.prototype.endGame = function(gameServer) {
     this.winner = this.contenders[0];
+    this.giveToken(this.winner.getOgarID());
     this.gamePhase = 3;
     this.timer = this.endTime; // 30 Seconds
 };
@@ -246,4 +247,17 @@ Tournament.prototype.updateLB = function(gameServer) {
             break;
     }
 };
+
+Tournament.prototype.giveToken = function(ID) {
+    // This gives one token to the player that won.
+//    var url = "http://ogar.jcc10.net/tokens/API/addToken.php?GM=10&ID=" + ID;
+//    request(url, function(error, response, body){
+//      if (!error && response.statusCode == 200) {
+//          console.log("Token Given!")
+//      } else {
+//        // If there is a error, report & return the clean nickname
+//        console.log("[Error][Token] " + error + ", status code: " + response.statusCode);
+//      }
+//    });
+}
 

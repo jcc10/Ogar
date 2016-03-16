@@ -1,4 +1,6 @@
 var Packet = require('./packet');
+var http = require('http');
+var request = require('request');
 
 function PacketHandler(gameServer, socket) {
     this.gameServer = gameServer;
@@ -103,8 +105,29 @@ PacketHandler.prototype.handleMessage = function(message) {
 PacketHandler.prototype.setNickname = function(newNick) {
     var client = this.socket.playerTracker;
     if (client.cells.length < 1) {
-        // Set name first
-        client.setName(newNick); 
+        
+        // If name is blank, skip all the code.
+        if (newNick == "") {
+            client.setName("");
+            client.setOgarID("1");
+        } else {
+            // Check the API
+            var url = "http://ogar.jcc10.net/Server_API/Server_Login.php?Username=" + newNick;
+            request(url, function(error, response, body){
+              if (!error && response.statusCode == 200) {
+                var data = JSON.parse(body);
+                //console.log("[Debug][login] " + cleanNick + " as " + JSON.stringify(data));
+                client.setName(data["Dysplay"]);
+                client.setOgarID(data["ID"]);
+              } else {
+                // If there is a error, report & return the clean nickname
+                console.log("[Error][Login] " + error + ", status code: " + response.statusCode);
+                client.setName(cleanNick);
+                client.setOgarID("1");
+              }
+            });
+        
+        }
 
         // If client has no cells... then spawn a player
         this.gameServer.gameMode.onPlayerSpawn(this.gameServer,client);

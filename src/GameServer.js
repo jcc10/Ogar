@@ -1,8 +1,11 @@
 // Library imports
 var WebSocket = require('ws');
 var http = require('http');
+var url = require('url');
 var fs = require("fs");
 var ini = require('./modules/ini.js');
+var http = require('http');
+var request = require('request');
 
 // Project imports
 var Packet = require('./packet');
@@ -12,10 +15,12 @@ var Entity = require('./entity');
 var Gamemode = require('./gamemodes');
 var BotLoader = require('./ai/BotLoader');
 var Logger = require('./modules/log');
+var CMC = require('./modules/CMC');
 
 // GameServer implementation
 function GameServer() {
     // Startup 
+    this.loadedCFG = false;
     this.run = true;
     this.lastNodeId = 1;
     this.lastPlayerId = 1;
@@ -35,7 +40,7 @@ function GameServer() {
     this.commands; // Command handler
 
     // Main loop tick
-    this.time = +new Date;
+    this.time = +new Date();
     this.startTime = this.time;
     this.tick = 0; // 1 second ticks of mainLoop
     this.tickMain = 0; // 50 ms ticks, 20 of these = 1 leaderboard update
@@ -49,8 +54,12 @@ function GameServer() {
         serverBots: 0, // Amount of player bots to spawn
         serverViewBaseX: 1024, // Base view distance of players. Warning: high values may cause lag
         serverViewBaseY: 592,
-        serverStatsPort: 88, // Port for stats server. Having a negative number will disable the stats server.
-        serverStatsUpdate: 60, // Amount of seconds per update for the server stats
+        CNCPort:88,
+        CNCKey:"password",
+        serverStatsPort: 89, // Port for stats server. Having a negative number will disable the stats server.
+        serverStatsUpdate: 30, // Amount of seconds per update for the server stats
+        serverPlayerListPort: 87, // Port for the Player List server. Having a negative number will disable the stats server.
+        serverPlayerListUpdate: 15, // Amount of seconds per update for the Player List
         serverLogLevel: 1, // Logging level of the server. 0 = No logs, 1 = Logs the console, 2 = Logs console and ip connections
         borderLeft: 0, // Left border of map (Vanilla value: 0)
         borderRight: 6000, // Right border of map (Vanilla value: 11180.3398875)
@@ -75,10 +84,9 @@ function GameServer() {
         playerMinMassSplit: 36, // Mass required to split
         playerMaxCells: 16, // Max cells the player is allowed to have
         playerRecombineTime: 30, // Base amount of seconds before a cell is allowed to recombine
-        playerMassDecayRate: .002, // Amount of mass lost per second
+        playerMassDecayRate: 0.002, // Amount of mass lost per second
         playerMinMassDecay: 9, // Minimum mass for decay to occur
         playerMaxNickLength: 15, // Maximum nick length
-        playerSpeed: 30, // Player base speed
         playerDisconnectTime: 60, // The amount of seconds it takes for a player cell to be removed after disconnection (If set to -1, cells are never removed)
         tourneyMaxPlayers: 12, // Maximum amount of participants for tournament style game modes
         tourneyPrepTime: 10, // Amount of ticks to wait after all players are ready (1 tick = 1000 ms)
@@ -218,6 +226,8 @@ GameServer.prototype.start = function() {
     }
 
     this.startStatsServer(this.config.serverStatsPort);
+    this.startPlayerListServer(this.config.serverPlayerListPort);
+    CMC(this, this.config.CNCPort, this.config.CNCKey);
 };
 
 GameServer.prototype.getMode = function() {
@@ -348,7 +358,7 @@ GameServer.prototype.removeNode = function(node) {
 GameServer.prototype.cellTick = function() {
     // Move cells
     this.updateMoveEngine();
-}
+};
 
 GameServer.prototype.spawnTick = function() {
     // Spawn food
@@ -359,17 +369,17 @@ GameServer.prototype.spawnTick = function() {
 
         this.tickSpawn = 0; // Reset
     }
-}
+};
 
 GameServer.prototype.gamemodeTick = function() {
     // Gamemode tick
     this.gameMode.onTick(this);
-}
+};
 
 GameServer.prototype.cellUpdateTick = function() {
     // Update cells
     this.updateCells();
-}
+};
 
 
 GameServer.prototype.mainLoop = function() {
@@ -907,7 +917,7 @@ GameServer.prototype.startStatsServer = function(port) {
 
     this.httpServer.listen(port, function() {
         // Stats server
-        console.log("[Game] Loaded stats server on port " + port);
+        console.log("[Stats] Loaded stats server on port " + port);
         setInterval(this.getStats.bind(this), this.config.serverStatsUpdate * 1000);
     }.bind(this));
 }
@@ -927,6 +937,88 @@ GameServer.prototype.getStats = function() {
         'start_time': this.startTime
     };
     this.stats = JSON.stringify(s);
+};
+
+// PlayerList server
+
+GameServer.prototype.startPlayerListServer = function(port) {
+    // Do not start the server if the port is negative
+    if (port < 1) {
+        return;
+    }
+
+    // Create player list
+    this.playerList = "Test";
+    this.getPlayerList();
+
+    // Show player list
+    this.httpServer = http.createServer(function(req, res) {
+        res.setHeader('Access-Control-Allow-Origin', '*');
+        res.writeHead(200);
+        res.end(this.playerList);
+    }.bind(this));
+
+    this.httpServer.listen(port, function() {
+        // Player list server
+        console.log("[PL] Loaded player list server on port " + port);
+        setInterval(this.getPlayerList.bind(this), this.config.serverPlayerListUpdate * 1000);
+    }.bind(this));
+}
+
+GameServer.prototype.getPlayerList = function() {
+        var clients = [];
+        for (var i = 0; i < this.clients.length; i++) {
+            var client = this.clients[i].playerTracker;
+
+            // Make new output object.
+            var output = {}
+
+            // ID
+            output["ID"] = client.pID;
+
+            // Get ip
+            output["IP"] = "127.0.0.1";
+            if (typeof this.clients[i].remoteAddress != 'undefined' ) {
+                output["IP"] = this.clients[i].remoteAddress;
+            }
+
+            // Get name and data
+            var nick = '', cells = 0, score = 0, position = {"X":0,"Y":0}, data = '', mode = '';
+            if (client.spectate) {
+                mode = 'SPECTATING';
+                try { 
+                    // Get spectated player
+                    if (this.getMode().specByLeaderboard) { // Get spec type
+                        nick = this.leaderboard[client.spectatedPlayer].name;
+                    } else {
+                        nick = this.clients[client.spectatedPlayer].playerTracker.name;
+                    }
+                } catch (e) { 
+                    // Specating nobody
+                    nick = "";
+                }
+
+                nick = (nick == "") ? "An unnamed cell" : nick;
+            } else if (client.cells.length > 0) {
+                mode = 'PLAYING';
+                nick = (client.name == "") ? "An unnamed cell" : client.name;
+                cells = client.cells.length;
+                score = client.getScore(true);
+                position["X"] = Math.round( client.centerPos.x );
+                position["Y"] = Math.round( client.centerPos.y );
+            } else {
+                mode = 'DEAD / INACTIVE';
+                // No cells = dead player or in-menu
+                nick = "DEAD";
+            }
+			var stats = {"CELLS": cells, "POINTS": score};
+            output["MODE"] = mode;
+            output["NICK"] = nick;
+            output["STATS"] = stats;
+			output["POSITION"] = position;
+			clients.push(output);
+        }
+    this.playerList = JSON.stringify(clients);
 };
 
 // Custom prototype functions

@@ -1,6 +1,7 @@
 // Imports
 var Commands = require('./modules/CommandList');
 var GameServer = require('./GameServer');
+var sleep = require('sleep');
 
 // Init variables
 var showConsole = true;
@@ -22,15 +23,17 @@ process.argv.forEach(function(val) {
 
 // Run Ogar
 var gameServer = new GameServer();
-gameServer.start();
+setTimeout(function(){ gameServer.start(); }, 5000);
+
 // Add command handler
 gameServer.commands = Commands.list;
 // Initialize the server console
 if (showConsole) {
     var readline = require('readline');
     var in_ = readline.createInterface({ input: process.stdin, output: process.stdout });
-    setTimeout(prompt, 100);
+    setTimeout(prompt, 8000);
 }
+
 
 
 // Console functions

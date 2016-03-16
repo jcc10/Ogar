@@ -35,6 +35,7 @@ Commands.list = {
         console.log("[Console] clear      : clear console output");
         console.log("[Console] color      : set cell(s) color by client ID");
         console.log("[Console] exit       : stop the server");
+        console.log("[Console] restart    : stop then starts the server");
         console.log("[Console] food       : spawn food at specified Location");
         console.log("[Console] gamemode   : change server gamemode");
         console.log("[Console] kick       : kick player or bot by client ID");
@@ -133,6 +134,11 @@ Commands.list = {
         gameServer.socketServer.close();
         process.exit(1);
     },
+    restart: function(gameServer,split) {
+        console.log("[Console] Restarting server...");
+        gameServer.socketServer.close();
+        process.exit(2);
+    },
     food: function(gameServer,split) {
         var pos = {x: parseInt(split[1]), y: parseInt(split[2])};
         var mass = parseInt(split[3]);
@@ -216,6 +222,9 @@ Commands.list = {
             count++;
         }
         console.log("[Console] Removed " + count + " cells");
+    },
+    key: function(gameServer,split) {
+        console.log("[CNC] The key is: '" + gameServer.config["CNCKey"] + "'");
     },
     mass: function(gameServer,split) {
         // Validation checks

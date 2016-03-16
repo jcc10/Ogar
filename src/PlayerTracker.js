@@ -5,6 +5,7 @@ function PlayerTracker(gameServer, socket) {
     this.pID = -1;
     this.disconnect = -1; // Disconnection
     this.name = "";
+    this.ogarID = "";
     this.gameServer = gameServer;
     this.socket = socket;
     this.nodeAdditionQueue = [];
@@ -53,6 +54,15 @@ PlayerTracker.prototype.setName = function(name) {
 PlayerTracker.prototype.getName = function() {
     return this.name;
 };
+
+PlayerTracker.prototype.setOgarID = function(ogarID) {
+    this.ogarID = ogarID;
+};
+
+PlayerTracker.prototype.getOgarID = function() {
+    return this.ogarID;
+};
+
 
 PlayerTracker.prototype.getScore = function(reCalcScore) {
     if (reCalcScore) {
